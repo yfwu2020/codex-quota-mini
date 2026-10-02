@@ -7,6 +7,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'playwright');
   const page=await browser.newPage({viewport:{width:280,height:300}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.clock.install({time:new Date('2026-10-03T03:00:00Z')});
   await page.goto('file://'+path.resolve(__dirname,'../ui/index.html'));
+  // install() keeps ticking between browser calls; sample only explicit intervals.
+  await page.clock.pauseAt(new Date('2026-10-03T03:01:00Z'));
   await page.evaluate(()=>window.quotaMini.update({remainingFiveHour:50,remainingWeek:78,activeSessions:0,status:'live'}));
   const body=await page.locator('[data-shell],[data-top],[data-bottom]').evaluateAll(es=>es.map(e=>e.getAttribute('d')));
   const set=async flow=>{await page.evaluate(flow=>quotaMini.setDebug({enabled:true,flow,sparkle:1,style:'fine'}),flow);await page.clock.runFor(32);};
@@ -17,7 +19,16 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'playwright');
   const tip=await page.evaluate(()=>{const d=document.querySelector('[data-top]').getAttribute('d');return Math.max(...[...d.matchAll(/[ML](-?[\d.]+),(-?[\d.]+)/g)].map(m=>+m[2]))});
   assert(+await page.locator('.fine-window').getAttribute('y')<tip,'Sand stream overlaps upper sand tip');
   const y=s=>+s.transform.match(/translate\(24 ([\d.]+)/)[1],width=s=>+s.transform.match(/scale\(([\d.]+)/)[1];
-  const results=[];for(const flow of [.25,1,2]){await set(flow);const a=await snapshot();await page.clock.runFor(128);const b=await snapshot();results.push({width:width(a),count:a.grains.length,travel:y(b)-y(a)});assert.deepEqual(b.body,body);}
+  const results=[];
+  for(const flow of [.25,1,2]){
+   await set(flow);
+   const started=await page.evaluate(()=>performance.now()),a=await snapshot();
+   await page.clock.runFor(128);
+   const b=await snapshot(),elapsed=await page.evaluate(()=>performance.now())-started;
+   assert.equal(elapsed,128,'Each flow sample must cover exactly 128 ms, including snapshot reads');
+   results.push({width:width(a),count:a.grains.length,travel:y(b)-y(a)});
+   assert.deepEqual(b.body,body);
+  }
   assert(results[0].width<results[1].width&&results[1].width<results[2].width);assert(results[0].count<results[1].count&&results[1].count<results[2].count);assert(Math.max(...results.map(r=>r.travel))/Math.min(...results.map(r=>r.travel))<1.25,'Flow changes width rather than falling speed');
   await set(.1);let a=await snapshot();assert.equal(a.mode,'single');assert.equal(a.points.length,3);assert(a.points.every(p=>p[0]==='24'));await page.clock.runFor(64);assert.notDeepEqual((await snapshot()).points,a.points);
   await set(0);a=await snapshot();await page.clock.runFor(320);assert.deepEqual(await snapshot(),a,'Zero flow pauses immediately');
