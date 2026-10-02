@@ -47,3 +47,17 @@ npm run package
 生成 `dist/codex-quota-mini-0.8.5.zip` 和相应 SHA-256 校验文件。ZIP 只包含插件所需的清单、技能、原生源码、界面、运行程序、设置服务及第三方声明；不包含测试依赖、账户数据、测试输出或本机编译的应用。
 
 修改功能时同步更新根目录包版本、两个插件清单、服务版本、服务锁文件和原生应用版本，再重建服务和发行包。服务依赖变动后也应更新第三方声明。
+
+## 文档配图
+
+README 的配图由当前界面代码和虚构数据生成，不读取账户、运行中的会话或已安装应用的设置。需要 macOS 图形会话、Apple Command Line Tools、上面的开发依赖，以及用于 GIF 编码的 Pillow：
+
+```sh
+python3 -m pip install Pillow
+node scripts/render_readme_media.cjs
+python3 scripts/update_file_inventory.py
+```
+
+输出位于 `docs/images/`。浏览器画面复用 `ui/quota.js` 和 `ui/style.css`，设置示意的标题和说明来自隔离目录中的 MCP 设置接口。原生调试面板使用原有 Swift 代码渲染到图片；四个详情位置来自实际 `placeDetails` 函数。拖动和会话跳转使用明确标注的操作示意，不控制真实 Codex 对话。
+
+生成过程可能短暂显示测试调试窗口；临时数据随生成结束清理，不覆盖已安装的悬浮圆。

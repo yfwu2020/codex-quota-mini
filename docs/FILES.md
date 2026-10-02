@@ -1,6 +1,6 @@
 # 发布文件清单
 
-共 85 个可提交文件。此清单不包含 Git 内部数据、依赖安装目录、缓存和发行 ZIP。
+共 102 个可提交文件。此清单不包含 Git 内部数据、依赖安装目录、缓存和发行 ZIP。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -17,6 +17,21 @@
 | `docs/PUBLISHING.md` | 说明、历史版本或演示图片 |
 | `docs/THIRD_PARTY_NOTICES.md` | 说明、历史版本或演示图片 |
 | `docs/VERIFICATION.md` | 说明、历史版本或演示图片 |
+| `docs/images/adaptive-placement.png` | 说明、历史版本或演示图片 |
+| `docs/images/appearance.png` | 说明、历史版本或演示图片 |
+| `docs/images/debug-panel-native.png` | 说明、历史版本或演示图片 |
+| `docs/images/debug-panel.png` | 说明、历史版本或演示图片 |
+| `docs/images/display-scope.png` | 说明、历史版本或演示图片 |
+| `docs/images/drag-position.gif` | 说明、历史版本或演示图片 |
+| `docs/images/fine-flow.gif` | 说明、历史版本或演示图片 |
+| `docs/images/hover-sessions.gif` | 说明、历史版本或演示图片 |
+| `docs/images/overview.gif` | 说明、历史版本或演示图片 |
+| `docs/images/quota-reset.gif` | 说明、历史版本或演示图片 |
+| `docs/images/quota-states.png` | 说明、历史版本或演示图片 |
+| `docs/images/sand-brightness.png` | 说明、历史版本或演示图片 |
+| `docs/images/sand-styles.png` | 说明、历史版本或演示图片 |
+| `docs/images/session-pace.gif` | 说明、历史版本或演示图片 |
+| `docs/images/settings.png` | 说明、历史版本或演示图片 |
 | `package-lock.json` | 仓库／插件元数据、说明或许可证 |
 | `package.json` | 仓库／插件元数据、说明或许可证 |
 | `plugins/codex-quota-mini/.codex-plugin/plugin.json` | Codex 插件清单 |
@@ -86,6 +101,8 @@
 | `plugins/codex-quota-mini/ui/style.css` | 圆环／沙漏绘制、动画或演示页面 |
 | `scripts/check_repository.py` | 编译、启动、仓库检查或发行工具 |
 | `scripts/package_release.py` | 编译、启动、仓库检查或发行工具 |
+| `scripts/render_native_readme.py` | 编译、启动、仓库检查或发行工具 |
+| `scripts/render_readme_media.cjs` | 编译、启动、仓库检查或发行工具 |
 | `scripts/run_browser_tests.py` | 编译、启动、仓库检查或发行工具 |
 | `scripts/run_native_tests.py` | 编译、启动、仓库检查或发行工具 |
 | `scripts/update_file_inventory.py` | 编译、启动、仓库检查或发行工具 |
