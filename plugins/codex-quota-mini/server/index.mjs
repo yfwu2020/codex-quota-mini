@@ -17,7 +17,7 @@ const debugFile=path.join(support,'debug.json');
 const app=path.join(support,'Codex Quota Mini.app');
 const execute=promisify(execFile);
 const capability={readTool:'quota_read_settings',updateTool:'quota_update_settings'};
-const server=new McpServer({name:'codex-quota-mini-mcp-server',title:'Codex Quota Mini',version:'0.8.5'},
+const server=new McpServer({name:'codex-quota-mini-mcp-server',title:'Codex Quota Mini',version:'0.8.6'},
  {capabilities:{experimental:{'openai/settings':capability}}});
 const coefficient=z.number().min(.001).max(10);
 const paceSchema=z.object({defaultCoefficient:coefficient,models:z.record(z.string(),coefficient)});

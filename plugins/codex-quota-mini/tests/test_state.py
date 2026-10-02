@@ -105,6 +105,62 @@ class QuotaTests(unittest.TestCase):
             c.close()
             self.assertEqual(state.active_threads(history,150,pathlib.Path(folder)/'missing.sqlite')[0]['threadId'],'one')
 
+    def test_resumed_rollout_uses_current_id_title_and_token_metadata(self):
+        with tempfile.TemporaryDirectory() as folder:
+            history = pathlib.Path(folder) / 'history.sqlite'
+            metadata = pathlib.Path(folder) / 'state.sqlite'
+            with sqlite3.connect(history) as c:
+                c.execute('create table thread_turns(thread_id text, rollout_ordinal integer, status text, started_at integer)')
+                c.execute('insert into thread_turns values (?,?,?,?)', ('rollout-id', 1, 'inProgress', 200))
+            with sqlite3.connect(metadata) as c:
+                c.execute('create table threads(id text, name text, title text, rollout_path text, model text, tokens_used integer)')
+                c.execute('insert into threads values (?,?,?,?,?,?)',
+                          ('current-id', '当前会话名称', '旧标题', '/sessions/rollout-2026-current-id_rollout-id.jsonl', 'model-a', 1200))
+            threads = state.active_threads(history, 150, metadata)
+            self.assertEqual(threads, [{'threadId': 'current-id', 'title': '当前会话名称', 'startedAt': 200}])
+            self.assertEqual(state.read_token_counters(metadata, [t['threadId'] for t in threads]),
+                             [{'threadId': 'current-id', 'model': 'model-a', 'totalTokens': 1200}])
+
+    def test_completed_current_id_supersedes_in_progress_rollout_alias(self):
+        with tempfile.TemporaryDirectory() as folder:
+            history = pathlib.Path(folder) / 'history.sqlite'
+            metadata = pathlib.Path(folder) / 'state.sqlite'
+            with sqlite3.connect(history) as c:
+                c.execute('create table thread_turns(thread_id text, rollout_ordinal integer, status text, started_at integer)')
+                c.executemany('insert into thread_turns values (?,?,?,?)', [
+                    ('rollout-id', 50, 'inProgress', 200), ('current-id', 1, 'completed', 210)])
+            with sqlite3.connect(metadata) as c:
+                c.execute('create table threads(id text, title text, rollout_path text)')
+                c.execute('insert into threads values (?,?,?)', ('current-id', '会话', '/sessions/rollout-2026-rollout-id.jsonl'))
+            self.assertEqual(state.active_threads(history, 150, metadata), [])
+
+    def test_rollout_and_current_id_are_counted_once(self):
+        with tempfile.TemporaryDirectory() as folder:
+            history = pathlib.Path(folder) / 'history.sqlite'
+            metadata = pathlib.Path(folder) / 'state.sqlite'
+            with sqlite3.connect(history) as c:
+                c.execute('create table thread_turns(thread_id text, rollout_ordinal integer, status text, started_at integer)')
+                c.executemany('insert into thread_turns values (?,?,?,?)', [
+                    ('rollout-id', 50, 'inProgress', 200), ('current-id', 1, 'inProgress', 210)])
+            with sqlite3.connect(metadata) as c:
+                c.execute('create table threads(id text, title text, rollout_path text)')
+                c.execute('insert into threads values (?,?,?)', ('current-id', '会话', '/sessions/rollout-2026-rollout-id.jsonl'))
+            self.assertEqual(state.active_threads(history, 150, metadata),
+                             [{'threadId': 'current-id', 'title': '会话', 'startedAt': 210}])
+
+    def test_rollout_alias_matches_full_filename_suffix(self):
+        with tempfile.TemporaryDirectory() as folder:
+            history = pathlib.Path(folder) / 'history.sqlite'
+            metadata = pathlib.Path(folder) / 'state.sqlite'
+            with sqlite3.connect(history) as c:
+                c.execute('create table thread_turns(thread_id text, rollout_ordinal integer, status text, started_at integer)')
+                c.execute('insert into thread_turns values (?,?,?,?)', ('short-id', 1, 'inProgress', 200))
+            with sqlite3.connect(metadata) as c:
+                c.execute('create table threads(id text, title text, rollout_path text)')
+                c.execute('insert into threads values (?,?,?)', ('other-id', '其他会话', '/sessions/rollout-2026-long-short-id.jsonl.backup'))
+            self.assertEqual(state.active_threads(history, 150, metadata),
+                             [{'threadId': 'short-id', 'title': '未命名会话', 'startedAt': 200}])
+
 
 if __name__ == '__main__':
     unittest.main()

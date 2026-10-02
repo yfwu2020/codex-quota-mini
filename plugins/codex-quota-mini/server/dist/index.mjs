@@ -30775,7 +30775,7 @@ var app = path2.join(support, "Codex Quota Mini.app");
 var execute = promisify(execFile);
 var capability = { readTool: "quota_read_settings", updateTool: "quota_update_settings" };
 var server = new McpServer(
-  { name: "codex-quota-mini-mcp-server", title: "Codex Quota Mini", version: "0.8.5" },
+  { name: "codex-quota-mini-mcp-server", title: "Codex Quota Mini", version: "0.8.6" },
   { capabilities: { experimental: { "openai/settings": capability } } }
 );
 var coefficient = external_exports3.number().min(1e-3).max(10);

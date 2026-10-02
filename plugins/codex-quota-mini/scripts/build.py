@@ -40,7 +40,7 @@ def build():
         shutil.copytree(ROOT / folder, target, ignore=shutil.ignore_patterns('__pycache__'))
     info = {'CFBundleName': 'Codex Quota Mini', 'CFBundleDisplayName': 'Codex Quota Mini',
             'CFBundleIdentifier': 'local.codex.quota-mini', 'CFBundleVersion': '1',
-            'CFBundleShortVersionString': '0.8.5', 'CFBundleExecutable': 'QuotaMini',
+            'CFBundleShortVersionString': '0.8.6', 'CFBundleExecutable': 'QuotaMini',
             'CFBundlePackageType': 'APPL', 'LSUIElement': True, 'NSHighResolutionCapable': True,
             'LSMinimumSystemVersion': '13.0'}
     with open(contents / 'Info.plist', 'wb') as stream:
