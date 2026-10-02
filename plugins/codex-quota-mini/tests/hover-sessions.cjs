@@ -1,0 +1,40 @@
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath: process.env.CHROME_PATH || undefined,headless:true});
+ try{
+  const page=await browser.newPage({viewport:{width:400,height:520}});
+  await page.goto('file://'+path.resolve(__dirname,'../ui/index.html'));
+  await page.evaluate(()=>{window.messages=[];window.quotaMini.host=m=>window.messages.push(m);window.quotaMini.update({remainingFiveHour:40,remainingWeek:60,accountScope:'one',status:'live',quotaUpdatedAt:Date.now()/1000,activityUpdatedAt:Date.now()/1000,activeSessions:2,activeThreads:[{threadId:'one',title:'第一个会话'},{threadId:'two',title:'<img src=x onerror=alert(1)>'}]});});
+  await page.locator('#orb').hover();
+  assert.equal(await page.locator('#details').isVisible(),true,'Hover opens details');
+  assert.equal(await page.locator('.session-row').count(),2);
+  assert.equal(await page.locator('.session-row').nth(1).innerText(),'<img src=x onerror=alert(1)>');
+  assert.equal(await page.locator('.session-row img').count(),0,'Titles are text, not HTML');
+  await page.mouse.move(350,500);await page.waitForTimeout(400);
+  assert.equal(await page.locator('#details').isVisible(),false,'Pure hover closes on leave');
+  await page.locator('#orb').hover();
+  await page.locator('.session-row').first().hover();
+  await page.waitForTimeout(400);
+  assert.equal(await page.locator('#details').isVisible(),true,'Pointer can enter the list');
+  await page.locator('.session-row').first().click();
+  assert.ok(await page.evaluate(()=>window.messages.some(m=>m.type==='openThread'&&m.threadId==='one')));
+  await page.mouse.move(350,500);await page.waitForTimeout(400);
+  assert.equal(await page.locator('#details').isVisible(),false,'Leaving closes hover details');
+  await page.locator('#orb').hover();await page.locator('#orb').click();
+  await page.mouse.move(350,500);await page.waitForTimeout(400);
+  assert.equal(await page.locator('#details').isVisible(),false,'Click cannot pin or open details');
+  assert.equal(await page.locator('[data-quit],.detail-footer').count(),0,'Redundant footer removed');
+  await page.locator('#orb').hover();
+  await page.evaluate(()=>{window.quotaMini.state.activityUpdatedAt=Date.now()/1000-11;window.quotaMini.renderDetails();});
+  assert.equal(await page.locator('.session-row').count(),0,'Expired activity cannot be opened');
+  assert.equal(await page.locator('.sessions').isVisible(),false,'Empty and unavailable session sections are omitted');
+  await page.evaluate(()=>window.quotaMini.update({...window.quotaMini.state,activityUpdatedAt:Date.now()/1000,activeThreads:[],activeSessions:0}));
+  assert.equal(await page.locator('.sessions').isVisible(),false);
+  await page.mouse.move(350,500);await page.waitForTimeout(450);
+  await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#orb').hover();
+  assert.equal(await page.locator('#details').evaluate(e=>e.getAnimations().length),0,'Reduced motion disables floating transitions');
+  console.log('Hover, list transfer, title escaping, navigation, hover-only behavior, clean empty state and reduced motion PASS');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

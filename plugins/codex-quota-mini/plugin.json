@@ -1,0 +1,29 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-quota-mini",
+  "version": "0.8.5",
+  "description": "本地悬浮沙漏显示 Codex 剩余额度，5 小时额度重置时翻转。",
+  "author": {
+    "name": "yfwu2020",
+    "url": "https://github.com/yfwu2020"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Codex Quota Mini",
+        "shortDescription": "D4 沙漏悬浮额度圆",
+        "longDescription": "44 px 可拖动悬浮圆，顺时针显示周额度，平面沙量显示 5 小时额度；运行中落沙，确认额度重置时翻转。",
+        "developerName": "yfwu2020",
+        "category": "Productivity",
+        "capabilities": [
+          "Interactive"
+        ],
+        "logo": "./assets/icon.svg",
+        "defaultPrompt": "启动 Codex Quota Mini 悬浮额度圆。"
+      }
+    }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/yfwu2020/codex-quota-mini",
+  "homepage": "https://github.com/yfwu2020/codex-quota-mini"
+}

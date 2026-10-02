@@ -1,0 +1,65 @@
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const fs = require('node:fs');
+const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
+const root = path.resolve(__dirname, '..');
+const initial = { remainingFiveHour: 10, remainingWeek: 39, primaryResetsAt: 1000, weeklyResetsAt: 9000, activeSessions: 1, activityUpdatedAt: Date.now()/1000, resetSerial: 0, accountScope: 'one', status: 'live', quotaUpdatedAt: Date.now()/1000 };
+
+(async () => {
+  assert.ok(fs.existsSync(path.join(root, 'ui/index.html')), 'D4 production widget is not implemented');
+  const browser = await chromium.launch({executablePath: process.env.CHROME_PATH || undefined, headless: true});
+  try {
+    const page = await browser.newPage({viewport: {width: 320, height: 480}});
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('file://' + path.join(root, 'ui/index.html'));
+    await page.evaluate(s => window.quotaMini.update(s), initial);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 0, 'First load must not flip');
+    const sand = await page.locator('[data-top]').getAttribute('d');
+    await page.waitForTimeout(500);
+    assert.equal(await page.locator('[data-top]').getAttribute('d'), sand, 'Particles must not drain quota');
+    await page.evaluate(s => window.quotaMini.update({...s, remainingFiveHour: 9}), initial);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 0, 'Normal consumption must not flip');
+    const reset = {...initial, remainingFiveHour: 100, primaryResetsAt: 2000, resetSerial: 1};
+    await page.evaluate(s => window.quotaMini.update(s), reset);
+    await page.waitForTimeout(250);
+    assert.notEqual(await page.locator('.hourglass').evaluate(e => getComputedStyle(e).transform), 'none', 'Confirmed reset must rotate the hourglass');
+    assert.equal(await page.locator('[data-week]').getAttribute('transform'), 'rotate(-90 24 24)', 'Ring must remain fixed');
+    await page.waitForTimeout(700);
+    assert.equal(await page.locator('.hourglass').evaluate(e => getComputedStyle(e).transform), 'none', 'Flip must finish at rest');
+    assert.notEqual(await page.locator('[data-top]').getAttribute('d'), sand, 'Reset must restore sand');
+    await page.evaluate(s => window.quotaMini.update(s), reset);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 0, 'Duplicate reset must not flip');
+    await page.evaluate(s => window.quotaMini.update({...s, remainingFiveHour: null}), reset);
+    await page.evaluate(s => window.quotaMini.update({...s, resetSerial: 2}), reset);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 1, 'Confirmed reset after unknown data must flip');
+    await page.waitForTimeout(800);
+    await page.evaluate(s => window.quotaMini.update({...s, accountScope: 'two', resetSerial: 2}), reset);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 0, 'Account switch must not flip');
+    await page.emulateMedia({reducedMotion: 'reduce'});
+    await page.evaluate(s => window.quotaMini.update({...s, accountScope: 'two', resetSerial: 3}), reset);
+    assert.equal(await page.locator('.hourglass').evaluate(e => e.getAnimations().length), 0, 'Reduced motion must suppress flipping');
+    assert.equal(await page.locator('.grain').count(), 0, 'Reduced motion must stop grains');
+    await page.emulateMedia({reducedMotion: 'no-preference'});
+    await page.evaluate(s => window.quotaMini.update({...s, activeSessions: 0}), reset);
+    assert.equal(await page.locator('.grain').count(), 0, 'No sessions must stop particles');
+    await page.evaluate(s => window.quotaMini.update({...s, activeSessions: 2}), reset);
+    assert.ok(await page.locator('.grain').count() > 0, 'An active session must resume particles');
+    await page.evaluate(() => { window.quotaMini.state.activityUpdatedAt=Date.now()/1000-11; });
+    await page.waitForTimeout(1100);
+    assert.equal(await page.locator('.grain').count(), 0, 'Lost activity updates must stop particles without another snapshot');
+    await page.evaluate(s => window.quotaMini.update({...s, remainingFiveHour: null, remainingWeek: null, status: 'unavailable'}), reset);
+    await page.locator('#orb').click();
+    assert.match(await page.locator('[data-five-value]').innerText(), /—/, 'Unavailable data must remain unknown');
+    assert.equal(await page.locator('[data-track]').getAttribute('stroke-dasharray'), null, 'Base track must be closed');
+    await page.screenshot({path: path.join(root, 'docs/unknown-preview.png')});
+    await page.evaluate(s => window.quotaMini.update(s), initial);
+    await page.screenshot({path: path.join(root, 'docs/44px-preview.png')});
+    await page.emulateMedia({colorScheme: 'dark'});
+    await page.screenshot({path: path.join(root, 'docs/dark-preview.png')});
+    assert.deepEqual(errors, []);
+    console.log('UI: reset flip, ring, duplicate/account guards, flat sand, session particles, reduced motion, unknown data PASS');
+  } finally {
+    await browser.close();
+  }
+})().catch(error => { console.error(error); process.exitCode = 1; });

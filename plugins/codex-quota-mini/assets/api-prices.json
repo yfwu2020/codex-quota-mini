@@ -1,0 +1,82 @@
+{
+  "verifiedOn": "2026-10-02",
+  "currency": "USD",
+  "unit": "per-million-tokens",
+  "baseline": "gpt-6.1-sol",
+  "inputShare": 0.5,
+  "outputShare": 0.5,
+  "assumptions": [
+    "Uncached text input and text output, fixed 1:1 mix because local metadata exposes only cumulative total tokens.",
+    "OpenAI Standard short-context rates. No cache, long-context, Fast/Batch/Flex, regional premium or tool charges.",
+    "DeepSeek peak USD rate used as a fixed comparison; off-peak discounts are not tracked. Legacy v4-flash routes to v4.1-flash.",
+    "MiMo overseas USD real-time API rate used for common currency comparison. Domestic billing is not inferred.",
+    "This is a dated price snapshot; no automatic network polling. Unknown models keep the configured fallback coefficient."
+  ],
+  "models": {
+    "gpt-6.1-sol": {
+      "input": 2,
+      "output": 10,
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol"
+    },
+    "gpt-6-sol": {
+      "input": 2,
+      "output": 10,
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-sol"
+    },
+    "gpt-6-astra": {
+      "input": 10,
+      "output": 50,
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-astra"
+    },
+    "gpt-6-luna": {
+      "input": 0.1,
+      "output": 0.5,
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-luna"
+    },
+    "gpt-5.6-sol": {
+      "input": 4,
+      "output": 20,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
+    },
+    "gpt-5.6-terra": {
+      "input": 2,
+      "output": 12,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-terra"
+    },
+    "gpt-5.6-luna": {
+      "input": 0.2,
+      "output": 1.2,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna"
+    },
+    "gpt-5.5": {
+      "input": 5,
+      "output": 30,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.5"
+    },
+    "gpt-5.4": {
+      "input": 2.5,
+      "output": 15,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4"
+    },
+    "gpt-5.4-mini": {
+      "input": 0.75,
+      "output": 4.5,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+    },
+    "gpt-5.3-codex": {
+      "input": 1.75,
+      "output": 14,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.3-codex"
+    },
+    "deepseek-v4-flash": {
+      "input": 0.3,
+      "output": 1.2,
+      "source": "https://api-docs.deepseek.com/quick_start/pricing/"
+    },
+    "mimo-v2.5-pro": {
+      "input": 0.435,
+      "output": 0.87,
+      "source": "https://mimo.mi.com/docs/en-US/price/pay-as-you-go"
+    }
+  }
+}

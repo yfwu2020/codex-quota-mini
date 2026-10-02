@@ -1,0 +1,40 @@
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'playwright');
+(async()=>{
+ const browser=await chromium.launch({executablePath: process.env.CHROME_PATH || undefined,headless:true});
+ try{
+  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.install({time:new Date('2026-10-02T12:00:00Z')});
+  await page.goto('file://'+path.resolve(__dirname,'../ui/index.html'));
+  await page.evaluate(()=>window.quotaMini.update({remainingFiveHour:50,remainingWeek:80,activeSessions:0,status:'live'}));
+  const sand=await page.locator('[data-top]').getAttribute('d');
+  const set=async value=>page.evaluate(value=>window.quotaMini.setDebug(value),value);
+  await set({enabled:true,flow:1,sparkle:1});await page.clock.runFor(200);
+  assert.equal(await page.locator('.grain').count(),5,'Debug preview runs without creating a session');
+  await set({enabled:true,flow:0,sparkle:0});await page.clock.runFor(32);
+  const paused=await page.locator('.grain').evaluateAll(es=>es.map(e=>e.getAttribute('cy')));
+  await page.clock.runFor(1000);
+  assert.deepEqual(await page.locator('.grain').evaluateAll(es=>es.map(e=>e.getAttribute('cy'))),paused,'Zero flow pauses sand immediately');
+  assert.ok(await page.locator('.grain-glint,.grain-light,.grain-glow').evaluateAll(es=>es.every(e=>Number(e.style.opacity)===0)),'Zero sparkle keeps sand but removes all flashes');
+  await set({enabled:true,flow:0,sparkle:1});await page.clock.runFor(32);
+  const normal=await page.locator('.grain-glint').evaluateAll(es=>es.map(e=>Number(e.style.opacity)));
+  assert.ok(normal.some(v=>v>0),'One-times sparkle restores reflections');
+  await set({enabled:true,flow:0,sparkle:2});await page.clock.runFor(32);
+  const bright=await page.locator('.grain-glint').evaluateAll(es=>es.map(e=>Number(e.style.opacity)));
+  assert.ok(bright.some((v,i)=>v>normal[i]));assert.ok(bright.every(v=>v<=1));
+  await set({enabled:true,flow:4,sparkle:2});await page.clock.runFor(80);
+  assert.notDeepEqual(await page.locator('.grain').evaluateAll(es=>es.map(e=>e.getAttribute('cy'))),paused,'Changing flow resumes actual sand motion');
+  assert.equal(await page.locator('[data-top]').getAttribute('d'),sand,'Debug never consumes visual quota');
+  assert.equal(await page.evaluate(()=>window.quotaMini.state.activeSessions),0);
+  assert.equal(await page.locator('.sessions').isVisible(),false,'Debug never invents running conversations');
+  await set({enabled:false,flow:4,sparkle:2});assert.equal(await page.locator('.grain').count(),0);
+  await page.evaluate(()=>window.quotaMini.update({...window.quotaMini.state,activeSessions:1,activityUpdatedAt:Date.now()/1000}));
+  assert.equal(await page.locator('.grain').count(),5,'Closing debug returns to real session activity');
+  assert.equal(await page.evaluate(()=>window.quotaMini.particleTargetSpeed()),.45,'Debug flow never leaks into automatic pace');
+  await page.emulateMedia({reducedMotion:'reduce'});await set({enabled:true,flow:4,sparkle:2});assert.equal(await page.locator('.grain').count(),0);
+  await page.emulateMedia({reducedMotion:'no-preference'});await set({enabled:true,flow:NaN,sparkle:9});
+  assert.deepEqual(await page.evaluate(()=>window.quotaMini.debug),{enabled:true,flow:1,sparkle:1,style:'soft'});
+  assert.deepEqual(errors,[]);console.log('Debug flow, pause, sparkle strength, no fake sessions/quota, exit to auto and motion guards PASS');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

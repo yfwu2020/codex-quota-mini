@@ -1,0 +1,9 @@
+{
+  "name": "quota-mini-local",
+  "plugins": [{
+    "name": "codex-quota-mini",
+    "source": { "source": "local", "path": "./plugins/codex-quota-mini" },
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_USE" },
+    "category": "Productivity"
+  }]
+}

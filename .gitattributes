@@ -1,0 +1,8 @@
+* text=auto
+*.png binary
+*.gif binary
+plugins/codex-quota-mini/server/dist/index.mjs linguist-generated=true -whitespace
+plugins/codex-quota-mini/runtime/vendor/** linguist-vendored=true
+# Preserve upstream license text and embedded whitespace in generated bundles.
+docs/THIRD_PARTY_NOTICES.md -whitespace
+plugins/codex-quota-mini/THIRD_PARTY_NOTICES.md -whitespace

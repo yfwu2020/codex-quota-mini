@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>D4 额度与落沙速度预览</title><link rel="stylesheet" href="style.css"><script src="quota.js" defer></script><script src="preview.js" defer></script>
+<style>
+body { padding:32px 20px; }
+main { max-width:660px; margin:auto; }
+h1 { font-size:18px; font-weight:500; margin:0; }
+p { color:var(--muted); line-height:1.7; margin:8px 0 24px; }
+.previews { display:flex; align-items:center; justify-content:center; gap:64px; min-height:210px; }
+.sample { display:flex; flex-direction:column; align-items:center; }
+.sample label { color:var(--muted); margin-top:12px; }
+.large .orb { width:144px; height:144px; }
+.large.quota-widget { width:152px; }
+.controls { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:28px; }
+.controls button { border:1px solid var(--line); padding:9px 14px; border-radius:9px; background:var(--paper); color:var(--ink); font:inherit; }
+.controls button:first-child { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.status { text-align:center; margin-top:16px; }
+.sample .details { display:none; }
+@media(max-width:400px) { .previews { gap:28px; } }
+</style></head>
+<body><main><h1>D4 · 额度与落沙</h1><p>外环表示本周剩余额度，沙量表示 5 小时剩余额度。落沙速度随近期消耗的估算速度柔和变化，彩色反光随砂粒短暂闪现。</p><div class="previews"><div class="sample"><div id="large"></div><label>放大预览</label></div><div class="sample"><div id="small"></div><label>44 px 实际尺寸</label></div></div><div class="controls"><button id="reset" type="button">演示额度重置</button><button id="consume" type="button">消耗 25%</button><button id="pace" type="button">落沙：轻缓</button><button id="running" type="button">暂停会话</button></div><p class="status" id="status" aria-live="polite"></p></main></body>
+</html>

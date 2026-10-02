@@ -1,0 +1,20 @@
+{
+  "name": "codex-quota-mini-workspace",
+  "version": "0.8.5",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm --prefix plugins/codex-quota-mini/server run build",
+    "test": "python3 -m unittest discover -s plugins/codex-quota-mini/tests -p 'test_*.py' && npm --prefix plugins/codex-quota-mini/server test && node plugins/codex-quota-mini/tests/settings-protocol.mjs",
+    "test:browser": "python3 scripts/run_browser_tests.py",
+    "test:native": "python3 scripts/run_native_tests.py",
+    "check": "python3 scripts/check_repository.py",
+    "package": "python3 scripts/package_release.py"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  },
+  "license": "MIT"
+}
