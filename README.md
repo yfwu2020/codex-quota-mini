@@ -1,8 +1,12 @@
 # Codex Quota Mini
 
-一个适用于 macOS 的 44 px 悬浮沙漏，用来查看 Codex 的剩余额度和运行中的本机会话。
+把 Codex 剩余额度收进一个 44 px 悬浮沙漏。圆环看本周额度，沙量看 5 小时额度；悬停查看详情，点击运行中的会话即可返回对话。
 
 **当前版本：0.8.5 · 非 OpenAI 官方插件 · 本地运行**
+
+![Codex Quota Mini 落沙动图：左侧放大预览，右侧 44 px 实际尺寸](plugins/codex-quota-mini/docs/sand-glints-preview.gif)
+
+*落沙动效示意：左侧放大展示，右侧为 44 px 实际尺寸。动图使用示例额度，来自开发阶段；当前外观和调试选项以演示页面及应用为准。*
 
 ## 功能
 
@@ -28,39 +32,47 @@
 
 ## 安装和启动
 
-先下载或克隆 [GitHub 仓库](https://github.com/yfwu2020/codex-quota-mini)，再进入仓库根目录：
+### 从 GitHub 安装
 
-```sh
-git clone https://github.com/yfwu2020/codex-quota-mini.git
-cd codex-quota-mini
-```
-
-如果尚未安装 Apple Command Line Tools，先运行：
+确认满足上面的运行要求。如果尚未安装 Apple Command Line Tools，先运行并完成安装：
 
 ```sh
 xcode-select --install
 ```
 
-注册本地插件市场并安装插件：
-
-```sh
-codex plugin marketplace add .
-codex plugin add codex-quota-mini@quota-mini-local
-python3 plugins/codex-quota-mini/scripts/launch.py start
-```
-
-也可以直接注册 GitHub 插件市场：
+在终端注册 GitHub 插件市场并安装：
 
 ```sh
 codex plugin marketplace add yfwu2020/codex-quota-mini --ref main
 codex plugin add codex-quota-mini@quota-mini-local
 ```
 
-安装后，在 Codex 对话中要求启动 Codex Quota Mini；插件技能会从安装目录编译并启动悬浮圆。
+安装后，在 Codex 对话中输入：**启动 Codex Quota Mini**。插件会从安装目录编译并启动悬浮圆。
+
+### 日常使用
 
 打开 Codex 的插件设置，搜索 **Codex Quota Mini**，即可使用“显示悬浮圆”“全局显示”和调试设置。
 
-也可以直接手动控制：
+- **查看详情**：将指针停在悬浮圆上，查看剩余额度、重置时间和运行中的会话。
+- **返回对话**：点击详情中的会话标题。
+- **调整位置**：拖动悬浮圆；关闭全局显示后，仅在 Codex 前台显示。
+- **调试或退出**：右键悬浮圆，打开调试面板或退出应用。
+
+关闭“显示悬浮圆”只隐藏窗口，右键退出则结束应用和帮助程序。
+
+### 从源码安装和手动控制
+
+如果希望查看源码或直接通过脚本启动，克隆仓库并进入根目录：
+
+```sh
+git clone https://github.com/yfwu2020/codex-quota-mini.git
+cd codex-quota-mini
+codex plugin marketplace add .
+codex plugin add codex-quota-mini@quota-mini-local
+python3 plugins/codex-quota-mini/scripts/launch.py start
+```
+
+以下命令在克隆的仓库根目录中运行：
 
 ```sh
 python3 plugins/codex-quota-mini/scripts/launch.py start
@@ -68,13 +80,13 @@ python3 plugins/codex-quota-mini/scripts/launch.py stop
 python3 plugins/codex-quota-mini/scripts/launch.py status
 ```
 
-`status` 会输出当前的本地状态，可能包含运行中会话的标题；分享输出前请自行检查。右键悬浮圆可打开调试面板或退出。关闭“显示悬浮圆”只隐藏窗口，右键退出则结束应用和帮助程序。
+`status` 会输出当前的本地状态，可能包含运行中会话的标题；分享输出前请自行检查。
 
 ## 预览
 
 在浏览器中打开 [演示页面](plugins/codex-quota-mini/ui/preview.html)。它使用示例数据，可以演示额度变化、落沙和沙漏翻转，不会消耗真实额度或兑换额度重置。
 
-[开发阶段的浅色截图](plugins/codex-quota-mini/docs/44px-preview.png) · [深色截图](plugins/codex-quota-mini/docs/dark-preview.png) · [落沙演示](plugins/codex-quota-mini/docs/sand-glints-preview.gif)
+[开发阶段的浅色截图](plugins/codex-quota-mini/docs/44px-preview.png) · [深色截图](plugins/codex-quota-mini/docs/dark-preview.png) · [查看原始动图](plugins/codex-quota-mini/docs/sand-glints-preview.gif)
 
 这些图片是早期版本的示例；当前外观和交互以代码及演示页面为准。
 
