@@ -10,7 +10,7 @@ class QuotaWidget {
    <circle class="ring-track" data-track cx="24" cy="24" r="20.4"></circle>
    <circle class="ring" data-week cx="24" cy="24" r="20.4" pathLength="100" transform="rotate(-90 24 24)" stroke-dasharray="100 100"></circle>
    <g class="hourglass"><path class="shell" data-shell fill-rule="evenodd"></path><path class="sand" data-top></path><path class="sand" data-bottom></path><g data-grains></g></g>
-  </svg></div>
+  </svg><span class="countdown" data-countdown aria-hidden="true" hidden><span data-countdown-value></span><span class="countdown-unit" data-countdown-unit></span></span></div>
   <section class="details" id="details" aria-label="剩余额度" hidden>
    <div class="detail-row"><span>5 小时</span><strong data-five-value>—</strong></div><p class="reset-time" data-five-reset></p>
    <div class="detail-row"><span>本周</span><strong data-week-value>—</strong></div><p class="reset-time" data-week-reset></p>
@@ -28,7 +28,7 @@ class QuotaWidget {
   document.addEventListener('visibilitychange',()=>{if(document.hidden)this.cancelFlip();this.renderSand();this.syncParticles();});
   window.addEventListener('pagehide',()=>{clearTimeout(this.hoverTimer);this.cancelFlip();this.stopParticles();});
   this.render();if(this.surface==='details')this.notifyLayout();
-  this.clock=setInterval(()=>{this.renderDetails();this.syncParticles();},1000);
+  this.clock=setInterval(()=>{this.renderDetails();this.renderCountdown();this.syncParticles();},1000);
  }
  host(message){window.webkit?.messageHandlers?.quota?.postMessage(message);}
  notifyLayout(){if(this.surface==='details')this.host({type:'detailsSize',height:Math.ceil(this.root.getBoundingClientRect().height)});}
@@ -66,14 +66,34 @@ class QuotaWidget {
   this.render();
  }
  cancelFlip(){if(this.flip){this.flip.cancel();this.flip=null;}}
- render(){const s=this.state,known=Number.isFinite(s.remainingWeek);this.root.classList.toggle('unknown',!Number.isFinite(s.remainingFiveHour));const ring=this.root.querySelector('[data-week]');ring.setAttribute('stroke-dashoffset',known?100-Math.max(0,Math.min(100,s.remainingWeek)):100);ring.style.opacity=known&&s.remainingWeek>0?'1':'0';if(!this.flip)this.renderSand();this.renderDetails();this.syncParticles();this.orb.setAttribute('aria-label',`Codex 额度：5 小时 ${this.percent(s.remainingFiveHour)}，本周 ${this.percent(s.remainingWeek)}，悬停查看详情`);}
+ render(){const s=this.state,known=Number.isFinite(s.remainingWeek);this.root.classList.toggle('unknown',!Number.isFinite(s.remainingFiveHour));const ring=this.root.querySelector('[data-week]');ring.setAttribute('stroke-dashoffset',known?100-Math.max(0,Math.min(100,s.remainingWeek)):100);ring.style.opacity=known&&s.remainingWeek>0?'1':'0';if(!this.flip)this.renderSand();this.renderDetails();this.renderCountdown();this.syncParticles();}
+ exhaustedWindow(){const s=this.state;if(Number.isFinite(s.remainingWeek)&&s.remainingWeek<=0)return {name:'本周',epoch:s.weeklyResetsAt};if(Number.isFinite(s.remainingFiveHour)&&s.remainingFiveHour<=0)return {name:'5 小时',epoch:s.primaryResetsAt};return null;}
+ renderCountdown(){
+  const s=this.state,window=this.exhaustedWindow(),overlay=this.root.querySelector('[data-countdown]');
+  this.root.classList.toggle('week-exhausted',Number.isFinite(s.remainingWeek)&&s.remainingWeek<=0);
+  this.root.classList.toggle('five-exhausted',Number.isFinite(s.remainingFiveHour)&&s.remainingFiveHour<=0);
+  overlay.hidden=!window;
+  let value='',unit='';
+  if(window){
+   if(!Number.isFinite(window.epoch)){value='—';unit='时间未知';}
+   else {
+    const seconds=Math.max(0,Math.ceil(window.epoch-Date.now()/1000));
+    if(seconds===0){value='00:00';unit='待更新';}
+    else if(seconds>=86400){value=`${Math.floor(seconds/86400)}天${Math.floor(seconds%86400/3600)}时`;unit='后重置';}
+    else {const hours=seconds>=3600,a=Math.floor(seconds/(hours?3600:60)),b=Math.floor(seconds%(hours?3600:60)/(hours?60:1));value=`${String(a).padStart(2,'0')}:${String(b).padStart(2,'0')}`;unit=hours?'时 · 分':'分 · 秒';}
+   }
+  }
+  this.root.querySelector('[data-countdown-value]').textContent=value;
+  this.root.querySelector('[data-countdown-unit]').textContent=unit;
+  this.orb.setAttribute('aria-label',`Codex 额度：5 小时 ${this.percent(s.remainingFiveHour)}，本周 ${this.percent(s.remainingWeek)}${window?`，${window.name}额度已耗尽，${this.resetTime(window.epoch)}`:''}，悬停查看详情`);
+ }
  renderSand(){const quota=this.state.remainingFiveHour,q=Number.isFinite(quota)?Math.max(0,Math.min(100,quota)):null;if(this.sandQuota===q)return;this.sandQuota=q;if(q===null){this.root.querySelector('[data-top]').setAttribute('d','');this.root.querySelector('[data-bottom]').setAttribute('d','');this.landing=36;return;}const bottom=this.lowerFill(100-q);this.root.querySelector('[data-top]').setAttribute('d',this.upperFill(q));this.root.querySelector('[data-bottom]').setAttribute('d',bottom.d);this.landing=bottom.landing;}
  percent(value){return Number.isFinite(value)?`${Math.round(value)}%`:'—';}
  resetTime(epoch){if(!Number.isFinite(epoch))return '重置时间暂不可用';const secs=epoch-Date.now()/1000;if(secs<=0)return '等待额度更新';if(secs>=86400)return `${Math.floor(secs/86400)} 天 ${Math.floor(secs%86400/3600)} 小时后重置`;return `${Math.floor(secs/3600)} 小时 ${Math.ceil(secs%3600/60)} 分后重置`;}
  activityFresh(){const stamp=this.state.activityUpdatedAt;return Number.isFinite(stamp)&&Math.abs(Date.now()/1000-stamp)<=10;}
  renderDetails(){const s=this.state;this.root.querySelector('[data-five-value]').textContent=this.percent(s.remainingFiveHour);this.root.querySelector('[data-week-value]').textContent=this.percent(s.remainingWeek);this.root.querySelector('[data-five-reset]').textContent=this.resetTime(s.primaryResetsAt);this.root.querySelector('[data-week-reset]').textContent=this.resetTime(s.weeklyResetsAt);this.renderSessions();}
  setDebug(next){const bounded=(v,max)=>Number.isFinite(v)&&v>=0&&v<=max;this.debug={enabled:next?.enabled===true,flow:bounded(next?.flow,4)?next.flow:1,sparkle:bounded(next?.sparkle,2)?next.sparkle:1,style:['soft','crystal','star','trail','color','fine'].includes(next?.style)?next.style:'soft'};if(this.debug.enabled)this.particleSpeed=this.debug.flow;this.syncParticles();}
- particlesAllowed(){return this.surface!=='details'&&(this.debug.enabled||(this.state.activeSessions>0&&this.activityFresh()))&&!this.motion.matches&&!document.hidden&&!this.flip;}
+ particlesAllowed(){return this.surface!=='details'&&(this.debug.enabled||(!this.exhaustedWindow()&&this.state.activeSessions>0&&this.activityFresh()))&&!this.motion.matches&&!document.hidden&&!this.flip;}
  particleTargetSpeed(){if(this.debug.enabled)return this.debug.flow;const s=this.state,rate=s.weightedTokensPerSecond,age=Math.abs(Date.now()/1000-s.tokenPaceUpdatedAt);return Number.isFinite(s.tokenPaceUpdatedAt)&&age<=10&&Number.isFinite(rate)&&rate>=0 ? .45+1.75*rate/(rate+500) : .45;}
  stopParticles(){if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;this.particleSpeed=.45;this.root.querySelector('[data-grains]').replaceChildren();}
  syncParticles(){

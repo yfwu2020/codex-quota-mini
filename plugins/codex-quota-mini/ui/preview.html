@@ -11,6 +11,8 @@ p { color:var(--muted); line-height:1.7; margin:8px 0 24px; }
 .sample label { color:var(--muted); margin-top:12px; }
 .large .orb { width:144px; height:144px; }
 .large.quota-widget { width:152px; }
+.large .countdown { font-size:32px; gap:6px; letter-spacing:-.8px; }
+.large .countdown-unit { font-size:23px; }
 .controls { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:28px; }
 .controls button { border:1px solid var(--line); padding:9px 14px; border-radius:9px; background:var(--paper); color:var(--ink); font:inherit; }
 .controls button:first-child { background:var(--ink); color:var(--paper); border-color:var(--ink); }
@@ -18,5 +20,5 @@ p { color:var(--muted); line-height:1.7; margin:8px 0 24px; }
 .sample .details { display:none; }
 @media(max-width:400px) { .previews { gap:28px; } }
 </style></head>
-<body><main><h1>D4 · 额度与落沙</h1><p>外环表示本周剩余额度，沙量表示 5 小时剩余额度。落沙速度随近期消耗的估算速度柔和变化，彩色反光随砂粒短暂闪现。</p><div class="previews"><div class="sample"><div id="large"></div><label>放大预览</label></div><div class="sample"><div id="small"></div><label>44 px 实际尺寸</label></div></div><div class="controls"><button id="reset" type="button">演示额度重置</button><button id="consume" type="button">消耗 25%</button><button id="pace" type="button">落沙：轻缓</button><button id="running" type="button">暂停会话</button></div><p class="status" id="status" aria-live="polite"></p></main></body>
+<body><main><h1>D4 · 额度与落沙</h1><p>外环表示本周剩余额度，沙量表示 5 小时剩余额度。耗尽时显示重置倒计时：5 小时额度耗尽仅沙漏变暗，周额度耗尽整个圆变暗，倒计时优先显示周额度。</p><div class="previews"><div class="sample"><div id="large"></div><label>放大预览</label></div><div class="sample"><div id="small"></div><label>44 px 实际尺寸</label></div></div><div class="controls"><button id="reset" type="button">演示额度重置</button><button id="consume" type="button">消耗 25%</button><button id="exhausted" type="button">演示耗尽状态</button><button id="pace" type="button">落沙：轻缓</button><button id="running" type="button">暂停会话</button></div><p class="status" id="status" aria-live="polite"></p></main></body>
 </html>

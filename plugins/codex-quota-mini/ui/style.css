@@ -4,7 +4,7 @@ html,body { margin:0; background:transparent; font:12px -apple-system,BlinkMacSy
 [hidden] { display:none!important; }
 .quota-widget { position:relative; width:52px; padding:4px; }
 .quota-widget.expanded { width:232px; }
-.orb { display:block; width:44px; height:44px; padding:0; border:0; border-radius:50%; background:var(--paper); color:var(--ink); touch-action:none; transition:background-color 850ms cubic-bezier(.22,1,.36,1),color 850ms cubic-bezier(.22,1,.36,1); }
+.orb { position:relative; display:block; width:44px; height:44px; padding:0; border:0; border-radius:50%; background:var(--paper); color:var(--ink); touch-action:none; transition:background-color 850ms cubic-bezier(.22,1,.36,1),color 850ms cubic-bezier(.22,1,.36,1); }
 .chart { display:block; width:100%; height:100%; transform-origin:center; transition:transform 850ms cubic-bezier(.22,1,.36,1); }
 .responding .orb,.native-orb .orb:hover { background:var(--hover-paper); color:var(--hover-ink); transition-duration:760ms; }
 .responding .chart,.native-orb .orb:hover .chart { transform:scale(1.02); transition-duration:760ms; }
@@ -20,6 +20,11 @@ html,body { margin:0; background:transparent; font:12px -apple-system,BlinkMacSy
 .fine-bright { fill:color-mix(in srgb,var(--fine-neutral),var(--fine-highlight) var(--fine-light)); }
 .hourglass { transform-box:view-box; transform-origin:24px 24px; }
 .quota-widget.unknown .hourglass { opacity:.35; }
+.five-exhausted:not(.week-exhausted) .hourglass { opacity:.18; }
+.week-exhausted .chart { opacity:.22; }
+.week-exhausted .orb,.week-exhausted.responding .orb,.week-exhausted.native-orb .orb:hover { background:light-dark(#e6e6e6,#181818); }
+.countdown { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; opacity:1; color:var(--ink); pointer-events:none; font-size:9.5px; font-weight:500; font-variant-numeric:tabular-nums; letter-spacing:-.25px; line-height:1; }
+.countdown-unit { font-size:7px; font-weight:400; letter-spacing:0; color:var(--muted); }
 .details { margin-top:8px; padding:14px; width:224px; background:var(--paper); border-radius:14px; }
 .detail-row { display:flex; justify-content:space-between; gap:12px; align-items:center; }
 .detail-row + .detail-row { margin-top:12px; }
